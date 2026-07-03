@@ -59,8 +59,8 @@ class WordleTest {
         String word2 = dictionary.getRandomWord();
         assertNotNull(word1);
         assertNotNull(word2);
-        assertEquals(5, word1.length());
-        assertEquals(5, word2.length());
+        assertEquals(WordleDictionary.WORD_LENGTH, word1.length());
+        assertEquals(WordleDictionary.WORD_LENGTH, word2.length());
         assertTrue(dictionary.contains(word1));
         assertTrue(dictionary.contains(word2));
     }
