@@ -16,7 +16,7 @@ public class WordleDictionaryLoader {
             String line;
             while ((line = reader.readLine()) != null) {
                 String normalized = normalizeWord(line.trim());
-                if (normalized.length() == 5 && isRussianWord(normalized)) {
+                if (normalized.length() == WordleDictionary.WORD_LENGTH && isRussianWord(normalized)) {
                     words.add(normalized);
                 }
             }
@@ -28,7 +28,8 @@ public class WordleDictionaryLoader {
         }
 
         if (words.isEmpty()) {
-            throw new DictionaryLoadException("Словарь пуст или не содержит слов длиной 5 букв", null);
+            throw new DictionaryLoadException(
+                    "Словарь пуст или не содержит слов длиной " + WordleDictionary.WORD_LENGTH + " букв", null);
         }
 
         return new WordleDictionary(words);

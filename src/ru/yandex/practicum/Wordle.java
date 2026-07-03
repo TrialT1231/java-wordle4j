@@ -38,11 +38,14 @@ public class Wordle {
                 String input = scanner.nextLine().trim();
 
                 if (input.isEmpty()) {
-                    String hint = game.getHint();
-                    if (hint != null) {
+                    try {
+                        String hint = game.getHint();
                         System.out.println("Подсказка: " + hint);
-                    } else {
+                    } catch (HintNotFoundException e) {
                         System.out.println("Нет подходящих слов для подсказки");
+                    } catch (EmptyDictionaryException e) {
+                        System.out.println("Ошибка: словарь пуст");
+                        logMessage("Ошибка: " + e.getMessage());
                     }
                     continue;
                 }
@@ -50,7 +53,7 @@ public class Wordle {
                 String normalizedInput = normalizeInput(input);
 
                 try {
-                    WordleGame.TurnResult result = game.makeTurn(normalizedInput);
+                    TurnResult result = game.makeTurn(normalizedInput);
 
                     System.out.println(normalizedInput);
                     System.out.println(result.getResult());

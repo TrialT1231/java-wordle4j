@@ -6,7 +6,10 @@ import java.util.Random;
 
 public class WordleDictionary {
 
+    public static final int WORD_LENGTH = 5;
+
     private final List<String> words;
+    private final Random random = new Random();
 
     public WordleDictionary(List<String> words) {
         this.words = new ArrayList<>(words);
@@ -20,11 +23,11 @@ public class WordleDictionary {
         return words.contains(word);
     }
 
-    public String getRandomWord() {
+    public String getRandomWord() throws EmptyDictionaryException {
         if (words.isEmpty()) {
-            return null;
+            throw new EmptyDictionaryException("Словарь пуст, невозможно выбрать слово");
         }
-        Random random = new Random();
+
         return words.get(random.nextInt(words.size()));
     }
 
@@ -33,15 +36,16 @@ public class WordleDictionary {
     }
 
     public static String analyzeWord(String guess, String answer) {
-        if (guess == null || answer == null || guess.length() != 5 || answer.length() != 5) {
+        if (guess == null || answer == null
+                || guess.length() != WORD_LENGTH || answer.length() != WORD_LENGTH) {
             return null;
         }
 
-        char[] result = new char[5];
-        boolean[] answerUsed = new boolean[5];
-        boolean[] guessUsed = new boolean[5];
+        char[] result = new char[WORD_LENGTH];
+        boolean[] answerUsed = new boolean[WORD_LENGTH];
+        boolean[] guessUsed = new boolean[WORD_LENGTH];
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < WORD_LENGTH; i++) {
             if (guess.charAt(i) == answer.charAt(i)) {
                 result[i] = '+';
                 answerUsed[i] = true;
@@ -49,7 +53,7 @@ public class WordleDictionary {
             }
         }
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < WORD_LENGTH; i++) {
             if (guessUsed[i]) {
                 continue;
             }
@@ -57,7 +61,7 @@ public class WordleDictionary {
             char guessChar = guess.charAt(i);
             boolean found = false;
 
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < WORD_LENGTH; j++) {
                 if (!answerUsed[j] && guessChar == answer.charAt(j)) {
                     result[i] = '^';
                     answerUsed[j] = true;

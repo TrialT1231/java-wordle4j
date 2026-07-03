@@ -3,16 +3,22 @@ package ru.yandex.practicum;
 import java.util.*;
 
 public class WordleGame {
+
+    private static final int MAX_STEPS = 6;
+
     private final String answer;
     private int steps;
-    private final int maxSteps = 6;
     private final WordleDictionary dictionary;
+    private final Random random = new Random();
+
     private final List<String> history;
     private final List<String> historyResults;
+
     private final Set<Character> correctLetters;
     private final Set<Character> incorrectLetters;
     private final Map<Character, Set<Integer>> correctPositions;
     private final Map<Character, Set<Integer>> incorrectPositions;
+
     private boolean gameOver;
     private boolean won;
 
@@ -23,7 +29,7 @@ public class WordleGame {
 
         this.dictionary = dictionary;
         this.answer = dictionary.getRandomWord();
-        this.steps = maxSteps;
+        this.steps = MAX_STEPS;
         this.history = new ArrayList<>();
         this.historyResults = new ArrayList<>();
         this.correctLetters = new HashSet<>();
@@ -39,8 +45,9 @@ public class WordleGame {
             throw new IllegalStateException("Игра уже завершена");
         }
 
-        if (word == null || word.length() != 5) {
-            throw new InvalidWordLengthException("Слово должно состоять из 5 букв");
+        if (word == null || word.length() != WordleDictionary.WORD_LENGTH) {
+            throw new InvalidWordLengthException(
+                    "Слово должно состоять из " + WordleDictionary.WORD_LENGTH + " букв");
         }
 
         if (!dictionary.contains(word)) {
@@ -70,23 +77,36 @@ public class WordleGame {
     }
 
     private void updateLetterInfo(String word, String result) {
-        for (int i = 0; i < 5; i++) {
+
+        Set<Character> presentThisTurn = new HashSet<>();
+        for (int i = 0; i < word.length(); i++) {
+            char status = result.charAt(i);
+            if (status == '+' || status == '^') {
+                presentThisTurn.add(word.charAt(i));
+            }
+        }
+
+        for (int i = 0; i < word.length(); i++) {
             char letter = word.charAt(i);
             char status = result.charAt(i);
 
             if (status == '+') {
                 correctLetters.add(letter);
+                incorrectLetters.remove(letter);
                 correctPositions.computeIfAbsent(letter, k -> new HashSet<>()).add(i);
             } else if (status == '^') {
                 correctLetters.add(letter);
+                incorrectLetters.remove(letter);
                 incorrectPositions.computeIfAbsent(letter, k -> new HashSet<>()).add(i);
             } else if (status == '-') {
-                incorrectLetters.add(letter);
+                if (!presentThisTurn.contains(letter)) {
+                    incorrectLetters.add(letter);
+                }
             }
         }
     }
 
-    public String getHint() {
+    public String getHint() throws EmptyDictionaryException, HintNotFoundException {
         if (history.isEmpty()) {
             return dictionary.getRandomWord();
         }
@@ -138,10 +158,9 @@ public class WordleGame {
         candidates.removeAll(history);
 
         if (candidates.isEmpty()) {
-            return null;
+            throw new HintNotFoundException("Нет подходящих слов для подсказки");
         }
 
-        Random random = new Random();
         return candidates.get(random.nextInt(candidates.size()));
     }
 
@@ -154,7 +173,7 @@ public class WordleGame {
     }
 
     public int getMaxSteps() {
-        return maxSteps;
+        return MAX_STEPS;
     }
 
     public List<String> getHistory() {
@@ -171,35 +190,5 @@ public class WordleGame {
 
     public boolean isWon() {
         return won;
-    }
-
-    public static class TurnResult {
-        private final String result;
-        private final int remainingSteps;
-        private final boolean gameOver;
-        private final boolean won;
-
-        public TurnResult(String result, int remainingSteps, boolean gameOver, boolean won) {
-            this.result = result;
-            this.remainingSteps = remainingSteps;
-            this.gameOver = gameOver;
-            this.won = won;
-        }
-
-        public String getResult() {
-            return result;
-        }
-
-        public int getRemainingSteps() {
-            return remainingSteps;
-        }
-
-        public boolean isGameOver() {
-            return gameOver;
-        }
-
-        public boolean isWon() {
-            return won;
-        }
     }
 }
